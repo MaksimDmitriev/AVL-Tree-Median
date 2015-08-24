@@ -20,24 +20,24 @@ public class AvlTree {
 		}
 		if (value < root.mValue) {
 			root.mLeft = insert(root.mLeft, value);
+			root.mLeft.mChildCount++;
 		} else {
 			root.mRight = insert(root.mRight, value);
+			root.mRight.mChildCount++;
 		}
 		return balance(root);
-	}	
+	}
 
 	private Node balance(Node p) {
-		fixHeight(p);
-
-		if (getBalanceFactor(p) == 2) {
-			if (getBalanceFactor(p.mRight) < 0) {
+		if (getSubtreeSizeDiff(p) == 2) {
+			if (getSubtreeSizeDiff(p.mRight) < 0) {
 				p.mRight = rotateRight(p.mRight);
 			}
 			return rotateLeft(p);
 		}
 
-		if (getBalanceFactor(p) == -2) {
-			if (getBalanceFactor(p.mLeft) > 0) {
+		if (getSubtreeSizeDiff(p) == -2) {
+			if (getSubtreeSizeDiff(p.mLeft) > 0) {
 				p.mLeft = rotateLeft(p.mLeft);
 			}
 			return rotateRight(p);
@@ -59,23 +59,24 @@ public class AvlTree {
 		Node q = p.mLeft;
 		p.mLeft = q.mRight;
 		q.mRight = p;
-		fixHeight(p);
-		fixHeight(q);
+		p.mChildCount = getRightChildCount(q) + 1;
+		q.mChildCount += getRightChildCount(p);
 		return q;
 	}
-
-	private int getBalanceFactor(Node p) {
-		return getHeight(p.mRight) - getHeight(p.mLeft);
+	
+	private int getLeftChildCount(Node node) {
+		return node.mLeft == null ? -1 : node.mRight.mChildCount;
 	}
-
-	private void fixHeight(Node p) {
-		int left = getHeight(p.mLeft);
-		int right = getHeight(p.mRight);
-		p.mHeight = Math.max(left, right) + 1;
+	
+	private int getRightChildCount(Node node) {
+		return node.mRight == null ? -1 : node.mRight.mChildCount;
 	}
+	
 
-	private int getHeight(Node p) {
-		return p == null ? 0 : p.mHeight;
+	// Strictly speaking, it's not a balance factor
+	private int getSubtreeSizeDiff(Node p) {
+		// TODO: NPE
+		return p.mRight.mChildCount - p.mLeft.mChildCount;
 	}
 
 	private static class Node {
@@ -83,16 +84,17 @@ public class AvlTree {
 		private Node mLeft;
 		private Node mRight;
 		private int mValue;
-		private int mHeight;
+		private int mChildCount;
 
 		Node(int value) {
 			mValue = value;
-			mHeight = 1;
 		}
 
 		@Override
 		public String toString() {
-			return Integer.toString(mValue) + ":" + Integer.toString(mHeight);
+			return Integer.toString(mValue) + " L:"
+					+ (mLeft == null ? "0" : mLeft.mChildCount)
+					+ (mRight == null ? "0" : mRight.mChildCount);
 		}
 	}
 
