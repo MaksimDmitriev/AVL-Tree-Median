@@ -1,5 +1,8 @@
 package com.avl;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
+
 
 public class AvlTree {
 
@@ -74,34 +77,61 @@ public class AvlTree {
     	}
     	int leftChildCount = mRoot.mLeft == null ? 0 : mRoot.mLeft.mChildCount;
     	int rightChildCount = mRoot.mRight == null ? 0 : mRoot.mRight.mChildCount;
+    	// Let's handle the simplest case
     	if (leftChildCount == rightChildCount) {
     		return mRoot.mValue;
     	}
-    	MedianHelper medianHelper = new MedianHelper();
-    	final int elementCount = mRoot.mChildCount + 1;
-    	getMedian(mRoot, 0, elementCount, elementCount % 2 == 0, medianHelper);
-    	return medianHelper.value;
+    	
     }
     
-    private int getMedian(Node root, int index, int elementCount, boolean even, MedianHelper medianHelper) {
-    	if (root == null) {
-    		return index;
+    private int kthSmallest(Node root, int k, boolean even) {
+    	Deque<Node> stack = new ArrayDeque<>();
+    	Node current = root;
+    	int i = 0;
+    	stack.push(current);
+    	int smallest = current.mValue;
+    	while(true) {
+    		if (current != null) {
+        		stack.push(current);
+        		current = current.mLeft;	
+    		} else {
+    			Node last = stack.pop();
+    			if (i == k) {
+    				smallest = last.mValue;
+    				break;
+    			}
+    			i++;
+    			current = last.mRight;
+    		}
     	}
-		index = getMedian(root.mLeft, index, elementCount, even, medianHelper);
-		if (even) {
-			if (index == elementCount / 2 - 1) {
-				medianHelper.value = root.mValue;
-			} else if (index == elementCount / 2) {
-				medianHelper.value += root.mValue;
-				medianHelper.value /= 2;
-			}
-		} else if (index == elementCount / 2) {
-			medianHelper.value = root.mValue;
-		}
-		index++;
-		index = getMedian(root.mRight, index, elementCount, even, medianHelper);
-    	return index;
+    	return smallest;
     }
+    
+    /*
+http://www.programcreek.com/2014/07/leetcode-kth-smallest-element-in-a-bst-java/
+		public int kthSmallest(TreeNode root, int k) {
+	    Stack<TreeNode> stack = new Stack<TreeNode>();
+	 
+	    TreeNode p = root;
+	    int result = 0;
+	 
+	    while(!stack.isEmpty() || p!=null){
+	        if(p!=null){
+	            stack.push(p);
+	            p = p.left;
+	        }else{
+	            TreeNode t = stack.pop();
+	            k--;
+	            if(k==0)
+	                result = t.val;
+	            p = t.right;
+	        }
+	    }
+	 
+	    return result;
+	}
+
+	*/
 
     private void fixHeightAndChildCount(Node p) {
         int hl = height(p.mLeft);
@@ -114,20 +144,6 @@ public class AvlTree {
         if (p.mRight != null) {
         	p.mChildCount += p.mRight.mChildCount + 1;
         }
-    }
-    
-    public int foo() {
-    	return foo(mRoot, 0);
-    }
-    
-    private int foo(Node root, int i) {
-    	if (root == null) {
-    		return i;
-    	}
-    	i = foo(root.mLeft, i);
-    	++i;
-    	i = foo(root.mRight, i);
-    	return i;
     }
 
     public void insert(int... keys) {
@@ -178,7 +194,7 @@ public class AvlTree {
 
         @Override
         public String toString() {
-            return Integer.toString(mValue) + " cc=" + mChildCount;
+            return Integer.toString(mValue);
         }
     }
 	
