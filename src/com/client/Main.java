@@ -5,7 +5,9 @@ import com.avl.AvlTree;
 public class Main {
 	
 	public static void main(String[] args) {
-		AvlTree avlTree = new AvlTree(10, 2, 4);
+		AvlTree avlTree = new AvlTree(3);
+		avlTree.insert(1, 2, 4);
+		System.out.println(avlTree.getMedian());
+		
 	}
-
 }

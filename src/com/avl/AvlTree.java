@@ -1,101 +1,189 @@
 package com.avl;
 
+
 public class AvlTree {
 
-	private Node mRoot;
+    Node mRoot;
 
-	public AvlTree(int... values) {
-		insert(values);
-	}
+    public AvlTree() {
 
-	public void insert(int... values) {
-		for (int value : values) {
-			mRoot = insert(mRoot, value);
-		}
-	}
+    }
 
-	private Node insert(Node root, int value) {
-		if (root == null) {
-			return new Node(value);
-		}
-		if (value < root.mValue) {
-			root.mLeft = insert(root.mLeft, value);
-			root.mLeft.mChildCount++;
-		} else {
-			root.mRight = insert(root.mRight, value);
-			root.mRight.mChildCount++;
-		}
-		return balance(root);
-	}
+    public AvlTree(int... keys) {
+    	insert(keys);
+    }
 
-	private Node balance(Node p) {
-		if (getSubtreeSizeDiff(p) == 2) {
-			if (getSubtreeSizeDiff(p.mRight) < 0) {
-				p.mRight = rotateRight(p.mRight);
+    private Node insert(Node parent, int key) {
+        if (parent == null) {
+            return new Node(key);
+        }
+        if (key < parent.mValue) {
+            parent.mLeft = insert(parent.mLeft, key);
+        } else {
+            parent.mRight = insert(parent.mRight, key);
+        }
+        return balance(parent);
+    }
+
+    private Node balance(Node p) {
+        fixHeightAndChildCount(p);
+        if (bfactor(p) == 2) {
+            if (bfactor(p.mRight) < 0) {
+                p.mRight = rotateRight(p.mRight);
+            }
+            return rotateLeft(p);
+        }
+        if (bfactor(p) == -2) {
+            if (bfactor(p.mLeft) > 0) {
+                p.mLeft = rotateLeft(p.mLeft);
+            }
+            return rotateRight(p);
+        }
+        return p;
+    }
+    
+    private Node rotateRight(Node p) {
+        Node q = p.mLeft;
+        p.mLeft = q.mRight;
+        q.mRight = p;
+        fixHeightAndChildCount(p);
+        fixHeightAndChildCount(q);
+        return q;
+    }
+    
+    private Node rotateLeft(Node q) {
+        Node p = q.mRight;
+        q.mRight = p.mLeft;
+        p.mLeft = q;
+        fixHeightAndChildCount(q);
+        fixHeightAndChildCount(p);
+        return p;
+    }
+
+    private int height(Node p) {
+        return p == null ? 0 : p.mHeight;
+    }
+    
+    private int bfactor(Node p) {
+        return height(p.mRight) - height(p.mLeft);
+    }
+    
+    public double getMedian() {
+    	if (mRoot == null) {
+    		return -1;
+    	}
+    	int leftChildCount = mRoot.mLeft == null ? 0 : mRoot.mLeft.mChildCount;
+    	int rightChildCount = mRoot.mRight == null ? 0 : mRoot.mRight.mChildCount;
+    	if (leftChildCount == rightChildCount) {
+    		return mRoot.mValue;
+    	}
+    	MedianHelper medianHelper = new MedianHelper();
+    	final int elementCount = mRoot.mChildCount + 1;
+    	getMedian(mRoot, 0, elementCount, elementCount % 2 == 0, medianHelper);
+    	return medianHelper.value;
+    }
+    
+    private int getMedian(Node root, int index, int elementCount, boolean even, MedianHelper medianHelper) {
+    	if (root == null) {
+    		return index;
+    	}
+		index = getMedian(root.mLeft, index, elementCount, even, medianHelper);
+		if (even) {
+			if (index == elementCount / 2 - 1) {
+				medianHelper.value = root.mValue;
+			} else if (index == elementCount / 2) {
+				medianHelper.value += root.mValue;
+				medianHelper.value /= 2;
 			}
-			return rotateLeft(p);
+		} else if (index == elementCount / 2) {
+			medianHelper.value = root.mValue;
 		}
+		index++;
+		index = getMedian(root.mRight, index, elementCount, even, medianHelper);
+    	return index;
+    }
 
-		if (getSubtreeSizeDiff(p) == -2) {
-			if (getSubtreeSizeDiff(p.mLeft) > 0) {
-				p.mLeft = rotateLeft(p.mLeft);
-			}
-			return rotateRight(p);
+    private void fixHeightAndChildCount(Node p) {
+        int hl = height(p.mLeft);
+        int hr = height(p.mRight);
+        p.mHeight = (hl > hr ? hl : hr) + 1;
+        p.mChildCount = 0;
+        if (p.mLeft != null) {
+        	p.mChildCount = p.mLeft.mChildCount + 1;
+        }
+        if (p.mRight != null) {
+        	p.mChildCount += p.mRight.mChildCount + 1;
+        }
+    }
+    
+    public int foo() {
+    	return foo(mRoot, 0);
+    }
+    
+    private int foo(Node root, int i) {
+    	if (root == null) {
+    		return i;
+    	}
+    	i = foo(root.mLeft, i);
+    	++i;
+    	i = foo(root.mRight, i);
+    	return i;
+    }
+
+    public void insert(int... keys) {
+        for (int value : keys) {
+            mRoot = insert(mRoot, value);
+        }
+    }
+
+	@Override
+	public String toString() {
+		if (mRoot == null) {
+			return "[]";
 		}
-
-		return p;
+		StringBuilder builder = new StringBuilder("[");
+		inOrderPrint(mRoot, builder);
+		builder.setLength(builder.length() - 2);
+		builder.append("]");
+		return builder.toString();
 	}
 
-	private Node rotateLeft(Node q) {
-		Node p = q.mRight;
-		q.mRight = p.mLeft;
-		p.mLeft = q;
-		fixHeight(q);
-		fixHeight(p);
-		return p;
+	private void inOrderPrint(Node root, StringBuilder builder) {
+		if (root != null) {
+			inOrderPrint(root.mLeft, builder);
+			builder.append(root + ", ");
+			inOrderPrint(root.mRight, builder);
+		}
 	}
 
-	private Node rotateRight(Node p) {
-		Node q = p.mLeft;
-		p.mLeft = q.mRight;
-		q.mRight = p;
-		p.mChildCount = getRightChildCount(q) + 1;
-		q.mChildCount += getRightChildCount(p);
-		return q;
-	}
+	static class Node {
+
+        Node mLeft;
+        Node mRight;
+        final int mValue;
+        private int mHeight;
+        private int mChildCount;
+
+        private Node(int value) {
+            mValue = value;
+            mHeight = 1;
+        }
+
+        @Override
+        public int hashCode() {
+            int res = 17;
+            res = 17 * res + mValue;
+            return res;
+        }
+
+        @Override
+        public String toString() {
+            return Integer.toString(mValue) + " cc=" + mChildCount;
+        }
+    }
 	
-	private int getLeftChildCount(Node node) {
-		return node.mLeft == null ? -1 : node.mRight.mChildCount;
+	static class MedianHelper {
+		
+		double value;
 	}
-	
-	private int getRightChildCount(Node node) {
-		return node.mRight == null ? -1 : node.mRight.mChildCount;
-	}
-	
-
-	// Strictly speaking, it's not a balance factor
-	private int getSubtreeSizeDiff(Node p) {
-		// TODO: NPE
-		return p.mRight.mChildCount - p.mLeft.mChildCount;
-	}
-
-	private static class Node {
-
-		private Node mLeft;
-		private Node mRight;
-		private int mValue;
-		private int mChildCount;
-
-		Node(int value) {
-			mValue = value;
-		}
-
-		@Override
-		public String toString() {
-			return Integer.toString(mValue) + " L:"
-					+ (mLeft == null ? "0" : mLeft.mChildCount)
-					+ (mRight == null ? "0" : mRight.mChildCount);
-		}
-	}
-
 }
