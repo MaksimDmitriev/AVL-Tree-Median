@@ -1,12 +1,13 @@
 package com.avl;
 
-import java.util.ArrayDeque;
+import java.awt.image.SampleModel;
 import java.util.Deque;
+import java.util.LinkedList;
 
 
 public class AvlTree {
 
-    Node mRoot;
+	public Node mRoot;
 
     public AvlTree() {
 
@@ -81,15 +82,30 @@ public class AvlTree {
     	if (leftChildCount == rightChildCount) {
     		return mRoot.mValue;
     	}
+    	int elementCount = leftChildCount + rightChildCount + 1;
+    	boolean treeHasEvenNodes = elementCount % 2 == 0;
+    	if (leftChildCount < rightChildCount) {
+    		
+    	} else {
+    		
+    	}
+    	return 0;
     	
     }
     
-    private int kthSmallest(Node root, int k, boolean even) {
-    	Deque<Node> stack = new ArrayDeque<>();
+    public double kthSmallest(Node root, int k, boolean even) {
+    	/*
+    	 * I chose LinkedList rather than ArrayDeque because LinkedList offers constant time 
+    	 * for delete() and insert(). pop() calls removeFirst(), and push(e) calls addFirst(e).
+    	 * 
+    	 * However, if I understand the answer on http://stackoverflow.com/a/249695/1065835 correctly, 
+    	 * the difference between constant time and amortized constant time is little if we perform 
+    	 * the operation many times.
+    	 */
+    	Deque<Node> stack = new LinkedList<>();
     	Node current = root;
     	int i = 0;
-    	stack.push(current);
-    	int smallest = current.mValue;
+    	double smallest = current.mValue;
     	while(true) {
     		if (current != null) {
         		stack.push(current);
@@ -98,6 +114,13 @@ public class AvlTree {
     			Node last = stack.pop();
     			if (i == k) {
     				smallest = last.mValue;
+    			}
+    			if (!even) {
+    				break;
+    			}
+    			if (even & i == k + 1) {
+    				smallest += last.mValue;
+    				smallest /= 2.0;
     				break;
     			}
     			i++;
@@ -106,32 +129,6 @@ public class AvlTree {
     	}
     	return smallest;
     }
-    
-    /*
-http://www.programcreek.com/2014/07/leetcode-kth-smallest-element-in-a-bst-java/
-		public int kthSmallest(TreeNode root, int k) {
-	    Stack<TreeNode> stack = new Stack<TreeNode>();
-	 
-	    TreeNode p = root;
-	    int result = 0;
-	 
-	    while(!stack.isEmpty() || p!=null){
-	        if(p!=null){
-	            stack.push(p);
-	            p = p.left;
-	        }else{
-	            TreeNode t = stack.pop();
-	            k--;
-	            if(k==0)
-	                result = t.val;
-	            p = t.right;
-	        }
-	    }
-	 
-	    return result;
-	}
-
-	*/
 
     private void fixHeightAndChildCount(Node p) {
         int hl = height(p.mLeft);
