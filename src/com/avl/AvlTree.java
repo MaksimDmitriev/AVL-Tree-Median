@@ -1,6 +1,5 @@
 package com.avl;
 
-import java.awt.image.SampleModel;
 import java.util.Deque;
 import java.util.LinkedList;
 
@@ -76,24 +75,54 @@ public class AvlTree {
     	if (mRoot == null) {
     		return -1;
     	}
-    	int leftChildCount = mRoot.mLeft == null ? 0 : mRoot.mLeft.mChildCount;
-    	int rightChildCount = mRoot.mRight == null ? 0 : mRoot.mRight.mChildCount;
+    	final int leftChildCount = mRoot.mLeft == null ? 0 : mRoot.mLeft.mChildCount + 1;
+    	final int rightChildCount = mRoot.mRight == null ? 0 : mRoot.mRight.mChildCount + 1;
     	// Let's handle the simplest case
     	if (leftChildCount == rightChildCount) {
     		return mRoot.mValue;
     	}
-    	int elementCount = leftChildCount + rightChildCount + 1;
-    	boolean treeHasEvenNodes = elementCount % 2 == 0;
-    	if (leftChildCount < rightChildCount) {
-    		
-    	} else {
-    		
+    	final int nodeCount = leftChildCount + rightChildCount + 1;
+    	final boolean evenNodes = nodeCount % 2 == 0;
+    	if (evenNodes) {
+        	if (leftChildCount == nodeCount / 2) {
+        		// the root predecessor and the root
+        		return (mRoot.mValue + getPredecessor(mRoot)) / 2.0;
+        	}
+        	if (rightChildCount == nodeCount / 2) {
+        		// the root and its successor
+        		return (mRoot.mValue + getSuccessor(mRoot)) / 2.0;
+        	}
     	}
-    	return 0;
-    	
+    	final boolean traverseLeft = leftChildCount > rightChildCount;
+		return traverseTreeToFind(leftChildCount, traverseLeft, nodeCount, evenNodes);
     }
     
-    public double kthSmallest(Node root, int k, boolean even) {
+    private int getPredecessor(Node node) {
+    	Node parent = node.mLeft;
+    	Node current = parent;
+    	while(current != null) {
+    		parent = current;
+    		current = current.mRight;
+    	}
+    	return parent.mValue;
+    }
+    
+    private int getSuccessor(Node node) {
+    	Node parent = node.mRight;
+    	Node current = parent;
+    	while (current != null) {
+    		parent = current;
+    		current = current.mLeft;
+    	}
+    	return parent.mValue;
+    }
+    
+    private double traverseTreeToFind(int leftChildCount, boolean traverseLeft, 
+    		int nodeCount, boolean evenNodes) {
+
+    	Node current = traverseLeft ? mRoot.mLeft : mRoot.mRight;
+     	int i = traverseLeft ? leftChildCount - 1 : leftChildCount + 1;
+    	final int k = evenNodes ? nodeCount / 2 - 1 : nodeCount / 2;
     	/*
     	 * I chose LinkedList rather than ArrayDeque because LinkedList offers constant time 
     	 * for delete() and insert(). pop() calls removeFirst(), and push(e) calls addFirst(e).
@@ -103,28 +132,32 @@ public class AvlTree {
     	 * the operation many times.
     	 */
     	Deque<Node> stack = new LinkedList<>();
-    	Node current = root;
-    	int i = 0;
     	double smallest = current.mValue;
     	while(true) {
     		if (current != null) {
         		stack.push(current);
-        		current = current.mLeft;	
+        		current = traverseLeft ? current.mRight : current.mLeft;
     		} else {
     			Node last = stack.pop();
-    			if (i == k) {
-    				smallest = last.mValue;
-    			}
-    			if (!even) {
-    				break;
-    			}
-    			if (even & i == k + 1) {
+				if (i == k) {
+					smallest = last.mValue;
+					if (!evenNodes) {
+						break;
+					}
+				}
+				if (traverseLeft && i == k - 1 || !traverseLeft && i == k + 1) {
     				smallest += last.mValue;
     				smallest /= 2.0;
     				break;
+				}
+    			
+    			if (traverseLeft) {
+    				i--;
+    				current = last.mLeft;
+    			} else {
+        			i++;
+        			current = last.mRight;
     			}
-    			i++;
-    			current = last.mRight;
     		}
     	}
     	return smallest;
