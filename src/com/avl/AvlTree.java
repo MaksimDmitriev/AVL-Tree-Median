@@ -6,7 +6,7 @@ import java.util.LinkedList;
 
 public class AvlTree {
 
-	public Node mRoot;
+	public Node root;
 
     public AvlTree() {
 
@@ -20,10 +20,10 @@ public class AvlTree {
         if (parent == null) {
             return new Node(key);
         }
-        if (key < parent.mValue) {
-            parent.mLeft = insert(parent.mLeft, key);
+        if (key < parent.key) {
+            parent.left = insert(parent.left, key);
         } else {
-            parent.mRight = insert(parent.mRight, key);
+            parent.right = insert(parent.right, key);
         }
         return balance(parent);
     }
@@ -31,14 +31,14 @@ public class AvlTree {
     private Node balance(Node p) {
         fixHeightAndChildCount(p);
         if (bfactor(p) == 2) {
-            if (bfactor(p.mRight) < 0) {
-                p.mRight = rotateRight(p.mRight);
+            if (bfactor(p.right) < 0) {
+                p.right = rotateRight(p.right);
             }
             return rotateLeft(p);
         }
         if (bfactor(p) == -2) {
-            if (bfactor(p.mLeft) > 0) {
-                p.mLeft = rotateLeft(p.mLeft);
+            if (bfactor(p.left) > 0) {
+                p.left = rotateLeft(p.left);
             }
             return rotateRight(p);
         }
@@ -46,51 +46,51 @@ public class AvlTree {
     }
     
     private Node rotateRight(Node p) {
-        Node q = p.mLeft;
-        p.mLeft = q.mRight;
-        q.mRight = p;
+        Node q = p.left;
+        p.left = q.right;
+        q.right = p;
         fixHeightAndChildCount(p);
         fixHeightAndChildCount(q);
         return q;
     }
     
     private Node rotateLeft(Node q) {
-        Node p = q.mRight;
-        q.mRight = p.mLeft;
-        p.mLeft = q;
+        Node p = q.right;
+        q.right = p.left;
+        p.left = q;
         fixHeightAndChildCount(q);
         fixHeightAndChildCount(p);
         return p;
     }
 
     private int height(Node p) {
-        return p == null ? 0 : p.mHeight;
+        return p == null ? 0 : p.height;
     }
     
     private int bfactor(Node p) {
-        return height(p.mRight) - height(p.mLeft);
+        return height(p.right) - height(p.left);
     }
     
     public double getMedian() {
-    	if (mRoot == null) {
-    		return -1;
+    	if (root == null) {
+    		return -1.0;
     	}
-    	final int leftChildCount = mRoot.mLeft == null ? 0 : mRoot.mLeft.mChildCount + 1;
-    	final int rightChildCount = mRoot.mRight == null ? 0 : mRoot.mRight.mChildCount + 1;
+    	final int leftChildCount = root.left == null ? 0 : root.left.childCount + 1;
+    	final int rightChildCount = root.right == null ? 0 : root.right.childCount + 1;
     	// Let's handle the simplest case
     	if (leftChildCount == rightChildCount) {
-    		return mRoot.mValue;
+    		return root.key;
     	}
     	final int nodeCount = leftChildCount + rightChildCount + 1;
     	final boolean evenNodes = nodeCount % 2 == 0;
     	if (evenNodes) {
         	if (leftChildCount == nodeCount / 2) {
         		// the root predecessor and the root
-        		return (mRoot.mValue + getPredecessor(mRoot)) / 2.0;
+        		return (root.key + getPredecessor(root)) / 2.0;
         	}
         	if (rightChildCount == nodeCount / 2) {
         		// the root and its successor
-        		return (mRoot.mValue + getSuccessor(mRoot)) / 2.0;
+        		return (root.key + getSuccessor(root)) / 2.0;
         	}
     	}
     	final boolean traverseLeft = leftChildCount > rightChildCount;
@@ -98,29 +98,29 @@ public class AvlTree {
     }
     
     private int getPredecessor(Node node) {
-    	Node parent = node.mLeft;
+    	Node parent = node.left;
     	Node current = parent;
     	while(current != null) {
     		parent = current;
-    		current = current.mRight;
+    		current = current.right;
     	}
-    	return parent.mValue;
+    	return parent.key;
     }
     
     private int getSuccessor(Node node) {
-    	Node parent = node.mRight;
+    	Node parent = node.right;
     	Node current = parent;
     	while (current != null) {
     		parent = current;
-    		current = current.mLeft;
+    		current = current.left;
     	}
-    	return parent.mValue;
+    	return parent.key;
     }
     
     private double traverseTreeToFind(int leftChildCount, boolean traverseLeft, 
     		int nodeCount, boolean evenNodes) {
 
-    	Node current = traverseLeft ? mRoot.mLeft : mRoot.mRight;
+    	Node current = traverseLeft ? root.left : root.right;
      	int i = traverseLeft ? leftChildCount - 1 : leftChildCount + 1;
     	final int k = evenNodes ? nodeCount / 2 - 1 : nodeCount / 2;
     	/*
@@ -132,31 +132,31 @@ public class AvlTree {
     	 * the operation many times.
     	 */
     	Deque<Node> stack = new LinkedList<>();
-    	double smallest = current.mValue;
+    	double smallest = current.key;
     	while(true) {
     		if (current != null) {
         		stack.push(current);
-        		current = traverseLeft ? current.mRight : current.mLeft;
+        		current = traverseLeft ? current.right : current.left;
     		} else {
     			Node last = stack.pop();
 				if (i == k) {
-					smallest = last.mValue;
+					smallest = last.key;
 					if (!evenNodes) {
 						break;
 					}
 				}
 				if (traverseLeft && i == k - 1 || !traverseLeft && i == k + 1) {
-    				smallest += last.mValue;
+    				smallest += last.key;
     				smallest /= 2.0;
     				break;
 				}
     			
     			if (traverseLeft) {
     				i--;
-    				current = last.mLeft;
+    				current = last.left;
     			} else {
         			i++;
-        			current = last.mRight;
+        			current = last.right;
     			}
     		}
     	}
@@ -164,31 +164,34 @@ public class AvlTree {
     }
 
     private void fixHeightAndChildCount(Node p) {
-        int hl = height(p.mLeft);
-        int hr = height(p.mRight);
-        p.mHeight = (hl > hr ? hl : hr) + 1;
-        p.mChildCount = 0;
-        if (p.mLeft != null) {
-        	p.mChildCount = p.mLeft.mChildCount + 1;
+        int hl = height(p.left);
+        int hr = height(p.right);
+        p.height = (hl > hr ? hl : hr) + 1;
+        p.childCount = 0;
+        if (p.left != null) {
+        	p.childCount = p.left.childCount + 1;
         }
-        if (p.mRight != null) {
-        	p.mChildCount += p.mRight.mChildCount + 1;
+        if (p.right != null) {
+        	p.childCount += p.right.childCount + 1;
         }
     }
 
     public void insert(int... keys) {
-        for (int value : keys) {
-            mRoot = insert(mRoot, value);
+        for (int key : keys) {
+        	if (key < 0) {
+        		throw new IllegalArgumentException("A tree key must be non-negative");
+        	}
+            root = insert(root, key);
         }
     }
 
 	@Override
 	public String toString() {
-		if (mRoot == null) {
+		if (root == null) {
 			return "[]";
 		}
 		StringBuilder builder = new StringBuilder("[");
-		inOrderPrint(mRoot, builder);
+		inOrderPrint(root, builder);
 		builder.setLength(builder.length() - 2);
 		builder.append("]");
 		return builder.toString();
@@ -196,40 +199,28 @@ public class AvlTree {
 
 	private void inOrderPrint(Node root, StringBuilder builder) {
 		if (root != null) {
-			inOrderPrint(root.mLeft, builder);
+			inOrderPrint(root.left, builder);
 			builder.append(root + ", ");
-			inOrderPrint(root.mRight, builder);
+			inOrderPrint(root.right, builder);
 		}
 	}
 
 	static class Node {
 
-        Node mLeft;
-        Node mRight;
-        final int mValue;
-        private int mHeight;
-        private int mChildCount;
+        Node left;
+        Node right;
+        final int key;
+        private int height;
+        private int childCount;
 
         private Node(int value) {
-            mValue = value;
-            mHeight = 1;
-        }
-
-        @Override
-        public int hashCode() {
-            int res = 17;
-            res = 17 * res + mValue;
-            return res;
+            key = value;
+            height = 1;
         }
 
         @Override
         public String toString() {
-            return Integer.toString(mValue);
+            return Integer.toString(key);
         }
     }
-	
-	static class MedianHelper {
-		
-		double value;
-	}
 }
