@@ -36,16 +36,22 @@ public class AvlTreeTest {
 		AvlTree avlTree = new AvlTree(5, 2, 7, 1, 6, 3, 8, 9);
 		Assert.assertEquals(5.5, avlTree.getMedian(), DELTA);
 	}
+	
+	@Test
+	public void testPredecessorAndRoot() {
+		AvlTree avlTree = new AvlTree(5, 2, 7, 1, 6, 3, 8, 4);
+		Assert.assertEquals(4.5, avlTree.getMedian(), DELTA);
+	}
 
 	@Test
 	public void testGoRight() {
-		AvlTree avlTree = new AvlTree(5, 2, 7, 1, 6, 3, 8, 9, 10);
-		Assert.assertEquals(6.0, avlTree.getMedian(), DELTA);
+		AvlTree avlTree = new AvlTree(5, 2, 9, 1, 3, 7, 12, 8, 11, 13);
+		Assert.assertEquals(7.5, avlTree.getMedian(), DELTA);
 	}
 
 	@Test
 	public void testGoLeft() {
-		AvlTree avlTree = new AvlTree(5, 1, 7, 0, 6, 3, 9, 2, 4);
+		AvlTree avlTree = new AvlTree(6, 3, 9, 1, 4, 7, 12, 0, 2, 5);
 		Assert.assertEquals(4.0, avlTree.getMedian(), DELTA);
 	}
 
