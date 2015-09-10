@@ -52,7 +52,7 @@ public class AvlTreeTest {
 	@Test
 	public void testGoLeft() {
 		AvlTree avlTree = new AvlTree(6, 3, 9, 1, 4, 7, 12, 0, 2, 5);
-		Assert.assertEquals(4.0, avlTree.getMedian(), DELTA);
+		Assert.assertEquals(4.5, avlTree.getMedian(), DELTA);
 	}
 
 }

@@ -121,7 +121,19 @@ public class AvlTree {
 
 		Node current = traverseLeft ? root.left : root.right;
 		int i = traverseLeft ? leftChildCount - 1 : leftChildCount + 1;
-		final int k = evenNodes ? nodeCount / 2 - 1 : nodeCount / 2;
+		int medianFirstIndex;
+		int medianSecondIndex;
+		if (!evenNodes) {
+			medianFirstIndex = medianSecondIndex = nodeCount / 2;
+		} else {
+			if (traverseLeft) {
+				medianFirstIndex = nodeCount / 2;
+				medianSecondIndex = medianFirstIndex - 1;
+			} else {
+				medianFirstIndex = nodeCount / 2 - 1;
+				medianSecondIndex = medianFirstIndex + 1;
+			}
+		}
 		/*
 		 * I chose LinkedList rather than ArrayDeque because LinkedList offers
 		 * constant time for delete() and insert(). pop() calls removeFirst(),
@@ -133,25 +145,24 @@ public class AvlTree {
 		 * perform the operation many times.
 		 */
 		Deque<Node> stack = new LinkedList<>();
-		double smallest = current.key;
+		double smallest = 0.0;
 		while (true) {
 			if (current != null) {
 				stack.push(current);
 				current = traverseLeft ? current.right : current.left;
 			} else {
 				Node last = stack.pop();
-				if (i == k) {
+				if (i == medianFirstIndex) {
 					smallest = last.key;
 					if (!evenNodes) {
 						break;
 					}
-				}
-				if (traverseLeft && i == k - 1 || !traverseLeft && i == k + 1) {
+				} else if (i == medianSecondIndex) {
 					smallest += last.key;
 					smallest /= 2.0;
 					break;
 				}
-
+				
 				if (traverseLeft) {
 					i--;
 					current = last.left;
