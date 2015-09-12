@@ -190,30 +190,7 @@ public class AvlTree {
 
 	public void insert(int... keys) {
 		for (int key : keys) {
-			if (key < 0) {
-				throw new IllegalArgumentException("A tree key must be non-negative");
-			}
 			root = insert(root, key);
-		}
-	}
-
-	@Override
-	public String toString() {
-		if (root == null) {
-			return "[]";
-		}
-		StringBuilder builder = new StringBuilder("[");
-		inOrderPrint(root, builder);
-		builder.setLength(builder.length() - 2);
-		builder.append("]");
-		return builder.toString();
-	}
-
-	private void inOrderPrint(Node root, StringBuilder builder) {
-		if (root != null) {
-			inOrderPrint(root.left, builder);
-			builder.append(root + ", ");
-			inOrderPrint(root.right, builder);
 		}
 	}
 

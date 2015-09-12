@@ -44,15 +44,25 @@ public class AvlTreeTest {
 	}
 
 	@Test
-	public void testGoRight() {
+	public void testGoRightEven() {
 		AvlTree avlTree = new AvlTree(5, 2, 9, 1, 3, 7, 12, 8, 11, 13);
 		Assert.assertEquals(7.5, avlTree.getMedian(), DELTA);
 	}
 
 	@Test
-	public void testGoLeft() {
+	public void testGoLeftEven() {
 		AvlTree avlTree = new AvlTree(6, 3, 9, 1, 4, 7, 12, 0, 2, 5);
 		Assert.assertEquals(4.5, avlTree.getMedian(), DELTA);
+	}
+	
+	@Test
+	public void testGoRightOdd() {
+		AvlTree avlTree = new AvlTree(10, 4, 14, 2, 5, 12, 17, 1, 3, 7, 11, 13, 16, 19, 15, 18, 20);
+		Assert.assertEquals(12.0, avlTree.getMedian(), DELTA);
+	}
+
+	@Test
+	public void testGoLeftOdd() {
 	}
 
 }
