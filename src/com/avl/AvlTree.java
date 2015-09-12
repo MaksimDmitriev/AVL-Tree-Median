@@ -72,7 +72,7 @@ public class AvlTree {
 
 	public double getMedian() {
 		if (root == null) {
-			return -1.0;
+			throw new IllegalStateException("The tree has no elements");
 		}
 		final int leftChildCount = root.left == null ? 0 : root.left.childCount + 1;
 		final int rightChildCount = root.right == null ? 0 : root.right.childCount + 1;
