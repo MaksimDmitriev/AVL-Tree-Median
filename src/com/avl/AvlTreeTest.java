@@ -7,11 +7,16 @@ public class AvlTreeTest {
 
 	private static final double DELTA = 1e-15;
 
-	@Test(expected = IllegalStateException.class)
+	@Test(expected = IllegalArgumentException.class)
+	public void testNull() {
+		AvlTree avlTree = new AvlTree(null);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
 	public void testEmpty() {
 		AvlTree avlTree = new AvlTree();
-		Assert.assertEquals(-1.0, avlTree.getMedian(), DELTA);
 	}
+
 
 	@Test
 	public void testSingle() {

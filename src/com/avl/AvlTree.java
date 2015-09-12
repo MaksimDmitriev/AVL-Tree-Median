@@ -7,11 +7,10 @@ public class AvlTree {
 
 	private Node root;
 
-	public AvlTree() {
-
-	}
-
 	public AvlTree(int... keys) {
+		if (keys == null || keys.length == 0) {
+			throw new IllegalArgumentException("Null or empty array");
+		}
 		insert(keys);
 	}
 
@@ -71,9 +70,6 @@ public class AvlTree {
 	}
 
 	public double getMedian() {
-		if (root == null) {
-			throw new IllegalStateException("The tree has no elements");
-		}
 		final int leftChildCount = root.left == null ? 0 : root.left.childCount + 1;
 		final int rightChildCount = root.right == null ? 0 : root.right.childCount + 1;
 		// Let's handle the simplest case
