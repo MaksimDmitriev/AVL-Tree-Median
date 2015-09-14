@@ -8,8 +8,8 @@ public class AvlTree {
 	private Node root;
 
 	public AvlTree(int... keys) {
-		if (keys == null || keys.length == 0) {
-			throw new IllegalArgumentException("Null or empty array");
+		if (keys == null) {
+			return;
 		}
 		insert(keys);
 	}
@@ -20,7 +20,7 @@ public class AvlTree {
 		}
 		if (key < parent.key) {
 			parent.left = insert(parent.left, key);
-		} else {
+		} else if (key > parent.key) {
 			parent.right = insert(parent.right, key);
 		}
 		return balance(parent);
@@ -70,6 +70,9 @@ public class AvlTree {
 	}
 
 	public double getMedian() {
+		if (root == null) {
+			throw new IllegalStateException("Can't get a median if the tree is empty");
+		}
 		final int leftChildCount = root.left == null ? 0 : root.left.childCount + 1;
 		final int rightChildCount = root.right == null ? 0 : root.right.childCount + 1;
 		// Let's handle the simplest case
