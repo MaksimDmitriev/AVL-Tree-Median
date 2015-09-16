@@ -1,11 +1,13 @@
 package com.avl;
 
-import java.util.Deque;
-import java.util.LinkedList;
 
 public class AvlTree {
 
 	private Node root;
+	private int size;
+	private int oldSize;
+	private int leftSubtreeSize;
+	private int rightSubtreeSize;
 
 	public AvlTree(int... keys) {
 		if (keys == null) {
@@ -16,18 +18,27 @@ public class AvlTree {
 
 	private Node insert(Node parent, int key) {
 		if (parent == null) {
+			size++;
 			return new Node(key);
 		}
 		if (key < parent.key) {
 			parent.left = insert(parent.left, key);
+			if (size > oldSize) {
+				leftSubtreeSize++;
+				oldSize = size;
+			}
 		} else if (key > parent.key) {
 			parent.right = insert(parent.right, key);
+			if (size > oldSize) {
+				rightSubtreeSize++;
+				oldSize = size;
+			}
 		}
 		return balance(parent);
 	}
 
 	private Node balance(Node p) {
-		fixHeightAndChildCount(p);
+		fixHeight(p);
 		if (bfactor(p) == 2) {
 			if (bfactor(p.right) < 0) {
 				p.right = rotateRight(p.right);
@@ -47,8 +58,8 @@ public class AvlTree {
 		Node q = p.left;
 		p.left = q.right;
 		q.right = p;
-		fixHeightAndChildCount(p);
-		fixHeightAndChildCount(q);
+		fixHeight(p);
+		fixHeight(q);
 		return q;
 	}
 
@@ -56,8 +67,8 @@ public class AvlTree {
 		Node p = q.right;
 		q.right = p.left;
 		p.left = q;
-		fixHeightAndChildCount(q);
-		fixHeightAndChildCount(p);
+		fixHeight(q);
+		fixHeight(p);
 		return p;
 	}
 
@@ -73,118 +84,33 @@ public class AvlTree {
 		if (root == null) {
 			throw new IllegalStateException("Can't get a median if the tree is empty");
 		}
-		final int leftChildCount = root.left == null ? 0 : root.left.childCount + 1;
-		final int rightChildCount = root.right == null ? 0 : root.right.childCount + 1;
-		// Let's handle the simplest case
-		if (leftChildCount == rightChildCount) {
-			return root.key;
-		}
-		final int nodeCount = leftChildCount + rightChildCount + 1;
-		final boolean evenNodes = nodeCount % 2 == 0;
-		if (evenNodes) {
-			if (leftChildCount == nodeCount / 2) {
-				// the root predecessor and the root
-				return (root.key + getPredecessor(root)) / 2.0;
-			}
-			if (rightChildCount == nodeCount / 2) {
-				// the root and its successor
-				return (root.key + getSuccessor(root)) / 2.0;
-			}
-		}
-		final boolean traverseLeft = leftChildCount > rightChildCount;
-		return traverseTreeToFind(leftChildCount, traverseLeft, nodeCount, evenNodes);
+		if (size % 2 == 0) {
+            int b = getNode(root, size / 2 - 1).key;
+            int a = getNode(root, size / 2).key;
+            return 0.5 * (a + b);
+        } else {
+            return getNode(root, size / 2).key;
+        }
 	}
+	
+	/**
+     * Returns the value of {@code index}th (in order) entry. Runs in 
+     * logarithmic time.
+     * 
+     * @param root  the root of the tree.
+     * @param index the index of the entry whose value to get.
+     * @return the value of {@code index}th value.
+     */
+    private Node getNode(Node root, int index) {
+        Node current = root;
+        // TODO: 
+        return null;
+    }
 
-	private int getPredecessor(Node node) {
-		Node parent = node.left;
-		Node current = parent;
-		while (current != null) {
-			parent = current;
-			current = current.right;
-		}
-		return parent.key;
-	}
-
-	private int getSuccessor(Node node) {
-		Node parent = node.right;
-		Node current = parent;
-		while (current != null) {
-			parent = current;
-			current = current.left;
-		}
-		return parent.key;
-	}
-
-	private double traverseTreeToFind(int leftChildCount, boolean traverseLeft, int nodeCount,
-			boolean evenNodes) {
-
-		Node current = traverseLeft ? root.left : root.right;
-		int i = traverseLeft ? leftChildCount - 1 : leftChildCount + 1;
-		int medianFirstIndex;
-		int medianSecondIndex;
-		if (!evenNodes) {
-			medianFirstIndex = medianSecondIndex = nodeCount / 2;
-		} else {
-			if (traverseLeft) {
-				medianFirstIndex = nodeCount / 2;
-				medianSecondIndex = medianFirstIndex - 1;
-			} else {
-				medianFirstIndex = nodeCount / 2 - 1;
-				medianSecondIndex = medianFirstIndex + 1;
-			}
-		}
-		/*
-		 * I chose LinkedList rather than ArrayDeque because LinkedList offers
-		 * constant time for delete() and insert(). pop() calls removeFirst(),
-		 * and push(e) calls addFirst(e).
-		 * 
-		 * However, if I understand the answer on
-		 * http://stackoverflow.com/a/249695/1065835 correctly, the difference
-		 * between constant time and amortized constant time is little if we
-		 * perform the operation many times.
-		 */
-		Deque<Node> stack = new LinkedList<>();
-		double smallest = 0.0;
-		while (true) {
-			if (current != null) {
-				stack.push(current);
-				current = traverseLeft ? current.right : current.left;
-			} else {
-				Node last = stack.pop();
-				if (i == medianFirstIndex) {
-					smallest = last.key;
-					if (!evenNodes) {
-						break;
-					}
-				} else if (i == medianSecondIndex) {
-					smallest += last.key;
-					smallest /= 2.0;
-					break;
-				}
-				
-				if (traverseLeft) {
-					i--;
-					current = last.left;
-				} else {
-					i++;
-					current = last.right;
-				}
-			}
-		}
-		return smallest;
-	}
-
-	private void fixHeightAndChildCount(Node p) {
+	private void fixHeight(Node p) {
 		int hl = height(p.left);
 		int hr = height(p.right);
 		p.height = (hl > hr ? hl : hr) + 1;
-		p.childCount = 0;
-		if (p.left != null) {
-			p.childCount = p.left.childCount + 1;
-		}
-		if (p.right != null) {
-			p.childCount += p.right.childCount + 1;
-		}
 	}
 
 	public void insert(int... keys) {
@@ -199,7 +125,6 @@ public class AvlTree {
 		private Node right;
 		private final int key;
 		private int height;
-		private int childCount;
 
 		private Node(int value) {
 			key = value;
