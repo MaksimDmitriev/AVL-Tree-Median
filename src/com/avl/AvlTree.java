@@ -1,12 +1,11 @@
 package com.avl;
 
+public class AvlTree {
 
-public class AvlTree<T extends Comparable<T>> {
-
-    private Node<T> root;
+    private Node root;
     private int size;
 
-    public AvlTree(T... keys) {
+    public AvlTree(int... keys) {
         if (keys == null) {
         	return;
         }
@@ -14,13 +13,13 @@ public class AvlTree<T extends Comparable<T>> {
     }
 
     /**
-     * Computes the number of child nodes in the left subtree of {@code node}.
+     * Computes the amount of child nodes in the left subtree of {@code node}.
      * Runs in constant time.
      * 
      * @param  node the node whose left subtree size to compute.
-     * @return the number of child nodes in the left subtree.
+     * @return the amount of child nodes in the left subtree.
      */
-    private int getLeftSubtreeSize(Node<T> node) {
+    private int getLeftSubtreeSize(Node node) {
         int tmp = node.childCount;
 
         if (node.right != null) {
@@ -38,8 +37,8 @@ public class AvlTree<T extends Comparable<T>> {
      * @param index the index of the entry whose value to get.
      * @return the value of {@code index}th value.
      */
-    private Node<T> getNode(Node<T> root, int index) {
-        Node<T> current = root;
+    private Node getNode(Node root, int index) {
+        Node current = root;
 
         for (;;) {
             int leftSubtreeSize = getLeftSubtreeSize(current);
@@ -70,21 +69,21 @@ public class AvlTree<T extends Comparable<T>> {
         }
 
         if (size % 2 == 0) {
-            T b = getNode(root, size / 2 - 1).key;
-            T a = getNode(root, size / 2).key;
+            int b = getNode(root, size / 2 - 1).key;
+            int a = getNode(root, size / 2).key;
             return 0.5 * (a + b);
         } else {
             return getNode(root, size / 2).key;
         }
     }
 
-    private Node<T> insert(Node<T> parent, T key) {
+    private Node insert(Node parent, int key) {
         if (parent == null) {
             ++size;
-            return new Node<T>(key);
+            return new Node(key);
         }
-        
-        if (key.compareTo(parent.key) < 0) {
+
+        if (key < parent.key) {
             parent.left = insert(parent.left, key);
         } else {
             parent.right = insert(parent.right, key);
@@ -93,7 +92,7 @@ public class AvlTree<T extends Comparable<T>> {
         return balance(parent);
     }
 
-    private Node<T> balance(Node<T> p) {
+    private Node balance(Node p) {
         fixHeightAndChildCount(p);
         if (bfactor(p) == 2) {
             if (bfactor(p.right) < 0) {
@@ -110,8 +109,8 @@ public class AvlTree<T extends Comparable<T>> {
         return p;
     }
 
-    private Node<T> rotateRight(Node<T> p) {
-        Node<T> q = p.left;
+    private Node rotateRight(Node p) {
+        Node q = p.left;
         p.left = q.right;
         q.right = p;
         fixHeightAndChildCount(p);
@@ -119,8 +118,8 @@ public class AvlTree<T extends Comparable<T>> {
         return q;
     }
 
-    private Node<T> rotateLeft(Node<T> q) {
-        Node<T> p = q.right;
+    private Node rotateLeft(Node q) {
+        Node p = q.right;
         q.right = p.left;
         p.left = q;
         fixHeightAndChildCount(q);
@@ -128,15 +127,15 @@ public class AvlTree<T extends Comparable<T>> {
         return p;
     }
 
-    private int height(Node<T> p) {
+    private int height(Node p) {
         return p == null ? 0 : p.height;
     }
 
-    private int bfactor(Node<T> p) {
+    private int bfactor(Node p) {
         return height(p.right) - height(p.left);
     }
 
-    private void fixHeightAndChildCount(Node<T> p) {
+    private void fixHeightAndChildCount(Node p) {
         int hl = height(p.left);
         int hr = height(p.right);
         p.height = (hl > hr ? hl : hr) + 1;
@@ -149,28 +148,28 @@ public class AvlTree<T extends Comparable<T>> {
         }
     }
 
-    public void insert(T... keys) {
-        for (T key : keys) {
+    public void insert(int... keys) {
+        for (int key : keys) {
             root = insert(root, key);
         }
     }
 
-    private static final class Node<T> {
+    private static final class Node {
 
-        private Node<T> left;
-        private Node<T> right;
-        private final T key;
+        private Node left;
+        private Node right;
+        private final int key;
         private int height;
         private int childCount;
 
-        private Node(T value) {
+        private Node(int value) {
             key = value;
             height = 1;
         }
 
         @Override
         public String toString() {
-            return key == null ? "" : key.toString();
+            return Integer.toString(key);
         }
     }
 }
