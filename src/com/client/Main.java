@@ -1,14 +1,18 @@
 package com.client;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import com.avl.AvlTree;
 
 public class Main {
 
 	public static void main(String[] args) {
-		
-	}
+		Map<A, Integer> map = new TreeMap<>();
+		map.put(new A(), 1);
+	} 
 	
-	static class A<T extends Number> {}
+	static class A {}
 	
 	private static void runWithAvl() {
 		AvlTree avlTree = new AvlTree();

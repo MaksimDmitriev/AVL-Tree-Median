@@ -1,12 +1,19 @@
 package com.avl;
 
+import java.util.Comparator;
 
-public class AvlTree<T extends Comparable<T>> {
+public class AvlTree<T> {
 
     private Node<T> root;
     private int size;
+    private Comparator<? super T> comparator;
 
     public AvlTree(T... keys) {
+    	this(null, keys);
+    }
+
+    public AvlTree(Comparator<? super T> comparator, T... keys) {
+    	this.comparator = comparator;
         if (keys == null) {
         	return;
         }
@@ -68,7 +75,6 @@ public class AvlTree<T extends Comparable<T>> {
             throw new IllegalStateException(
                     "Asking for median from an empty tree.");
         }
-
         if (size % 2 == 0) {
             T b = getNode(root, size / 2 - 1).key;
             T a = getNode(root, size / 2).key;
@@ -83,13 +89,21 @@ public class AvlTree<T extends Comparable<T>> {
             ++size;
             return new Node<T>(key);
         }
-        
-        if (key.compareTo(parent.key) < 0) {
-            parent.left = insert(parent.left, key);
+        if (comparator != null) {
+        	if (comparator.compare(key, parent.key) < 0) {
+        		parent.left = insert(parent, key);
+        	} else if (comparator.compare(key, parent.key) > 0) {
+        		parent.right = insert(parent, key);
+        	}
         } else {
-            parent.right = insert(parent.right, key);
+        	@SuppressWarnings("unchecked")
+			Comparable<? super T> k = (Comparable<? super T>) key;
+            if (k.compareTo(parent.key) < 0) {
+                parent.left = insert(parent.left, key);
+            } else if (k.compareTo(parent.key) > 0) {
+                parent.right = insert(parent.right, key);
+            }
         }
-
         return balance(parent);
     }
 
